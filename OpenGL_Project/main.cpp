@@ -115,7 +115,7 @@ int main()
     glDeleteShader(fragmentShader);
 */
     
-    Shader shader("/Users/dy/Desktop/OpenGL_Project/OpenGL_Project/GLSL/vertex.glsl","/Users/dy/Desktop/OpenGL_Project/OpenGL_Project/GLSL/fragment.glsl");
+    Shader shader("../GLSL/vertex.glsl","../GLSL/fragment.glsl");
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
