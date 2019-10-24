@@ -16,25 +16,24 @@ void processInput(GLFWwindow *window);
 // 窗口宽高
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-/*
-const char *vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;   // 位置变量的属性位置值为 0\n"
-"layout (location = 1) in vec3 aColor; // 颜色变量的属性位置值为 1\n"
-"out vec3 ourColor; // 向片段着色器输出一个颜色\n"
-"void main()\n"
-"{\n"
-    "gl_Position = vec4(aPos, 1.0);\n"
-    "ourColor = aColor; // 将ourColor设置为我们从顶点数据那里得到的输入颜色\n"
-"}\n";
 
-const char *fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"void main()\n"
-"{\n"
-    "FragColor = vec4(ourColor, 1.0);\n"
-"}\n";
-*/
+// 因为SOIL获取的图像数据是反过来的，所以需要将数据反转一下
+void ReverseImage(int width, int height,unsigned char * data,int chanel)
+{
+    int i,j;
+    for (j=0; j*2<height; j++) {
+        int index1 = j * width * chanel;
+        int index2 = (height-1-j) * width * chanel;
+        for (i = width * chanel; i>0; --i) {
+            unsigned char temp = data[index1];
+            data[index1] = data[index2];
+            data[index2] = temp;
+            index2++;
+            index1++;
+        }
+    }
+}
+
 int main()
 {
     // glfw: initialize and configure
@@ -68,60 +67,42 @@ int main()
         return -1;
     }
     
-/*..封装成了一个类
-    // 以下是构架和编译shader程序
-    // ------------------------------------
-    // 顶点 shader
-    int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    // 设置顶点源文件
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // check for shader compile errors
-    int success;
-    char infoLog[512];
-    // 检测编译的顶点着色器是否成功
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    
-    // 片段 shader
-    int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // 检测片段着色器是否编译成功
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    
-    // 创建一个着色器对象，这个着色器对象可以管理我们创建的各个着色器，将他们按照位置放进渲染管线里面
-    int shaderProgram = glCreateProgram();
-    // 将我们创建的顶点和片段着色器附加到这个对象上面
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    
-    // 将对象上的着色器按照渲染管线链接起来
-    glLinkProgram(shaderProgram);
-    // 检查链接的结果是否正确
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        // 获得链接的错误信息
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-*/
-    
     Shader shader("../GLSL/vertex.glsl","../GLSL/fragment.glsl");
     
+    // 加载纹理部分
     int width,height,Channels;
     unsigned char* data = stbi_load("../assert/img_cheryl.jpg",&width,&height,&Channels,0);
+    
+    unsigned int texture;
+    // 第一个参数我们需要告诉OpenGL生成纹理的数量，并将其储存在unsigned int的数组中，因为现在我们只生成一个纹理，所以就不同数组了，使用一个单独的值
+    glGenTextures(1,&texture);
+    // 绑定纹理数组，让之后的纹理操作都在这个纹理上
+    glBindTexture(GL_TEXTURE_2D,texture);
+    // 使用前面图像的data数据生成纹理
+    if (data) {
+        ReverseImage(width, height, data, Channels);
+        /*
+         参数解析：
+         1、指定了要将纹理生成在哪一个纹理对象上
+         2、为纹理设置多级渐进纹理的级别，如果希望手动设置的话，此处可以设为0，表示只设置第一级别的纹理，如果要设置其他级别的纹理，需要改动此参数
+         3、告诉OpenGL我们希望把纹理设置成哪一种储存模式
+         4、5、纹理原图像的宽高
+         6、文档上写的是历史遗留问题，设置为0就行
+         7、告诉OpenGL原图的格式
+         8、告诉OpenGL原图的类型，因为我们获取的是char(byte)类型的数据，所以此处传GL_UNSIGNED_BYTE
+         9、图像的数据
+         */
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
+        // 为当前绑定的纹理生成所有级别的渐进纹理
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else{
+        std::cout<<"使用SOIL加载图像数据失败"<<std::endl;
+    }
+    // 生成纹理之后，释放刚才的图像数据
+    stbi_image_free(data);
+    
+    
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -139,11 +120,11 @@ int main()
     };
     
     float vertices_diamond[] ={
-        // 位置             // 颜色
-        -0.5f,0.0f,0.0f,   1.0f,0.0f,0.0f,
-        0.5f,0.0f,0.0f,    0.0f,1.0f,0.0f,
-        0.0f,0.5f,0.0f,    0.0f,0.0f,1.0f,
-        0.0f,-0.5f,0.0f,   1.0f,1.0f,1.0f,
+        // 位置             // 颜色          //纹理坐标
+        0.5f,0.5f,0.0f,     1.0f,0.0f,0.0f,  1.0f,1.0f,
+        0.5f,-0.5f,0.0f,    0.0f,1.0f,0.0f,  1.0f,0.0f,
+        -0.5f,-0.5f,0.0f,   0.0f,0.0f,1.0f,  0.0f,0.0f,
+        -0.5f,0.5f,0.0f,    1.0f,1.0f,1.0f,  0.0f,1.0f,
     };
     
     unsigned int index[] = {
@@ -152,8 +133,8 @@ int main()
     };
     
     unsigned int diamond_index[] ={
-        0,1,2,
-        0,1,3,
+        0,2,3,
+        0,2,1,
     };
     
     unsigned int VBO, VAO,IBO;
@@ -181,11 +162,14 @@ int main()
     // 第五个参数指的是步长,现在我们一个顶点里面有三个数据，所以步长就是3个float，步长也就是一个顶点里面有个值，加了颜色之后就是6个float
     // 第六个参数指的是所需要的数据在顶点缓冲对象VBO里面的偏移量，因为我们现在使用的就是从开头到VBO结尾的数据，所以这个偏移量就是0
     // 位置属性
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // 颜色属性
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 8 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
+    // 纹理属性
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, 8 * sizeof(float), (void*)(6* sizeof(float)));
+    glEnableVertexAttribArray(2);
     
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -212,7 +196,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         
         // draw our first triangle
-        
+        glBindTexture(GL_TEXTURE_2D,texture);
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         //glUseProgram(shaderProgram);
         shader.use();
