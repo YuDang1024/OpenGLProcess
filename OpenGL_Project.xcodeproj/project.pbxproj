@@ -20,6 +20,8 @@
 		0050153F2312659800D9A4D8 /* libglfw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0050153E2312659800D9A4D8 /* libglfw3.a */; };
 		0050158A231265CE00D9A4D8 /* libGLEW.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00501589231265CE00D9A4D8 /* libGLEW.a */; };
 		0050158C2312667100D9A4D8 /* libglfw.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0050158B2312667100D9A4D8 /* libglfw.3.dylib */; };
+		D806A87B2361481C005B5D08 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D806A87A2361481C005B5D08 /* CoreFoundation.framework */; };
+		D806A87D23614BAA005B5D08 /* libSOIL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D806A87C23614BAA005B5D08 /* libSOIL.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -53,6 +55,10 @@
 		0050153E2312659800D9A4D8 /* libglfw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libglfw3.a; path = ../../../../../usr/local/lib/libglfw3.a; sourceTree = "<group>"; };
 		00501589231265CE00D9A4D8 /* libGLEW.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGLEW.a; path = ../../../../../usr/local/lib/libGLEW.a; sourceTree = "<group>"; };
 		0050158B2312667100D9A4D8 /* libglfw.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.dylib; path = ../../../../../usr/local/lib/libglfw.3.dylib; sourceTree = "<group>"; };
+		D806A87423607876005B5D08 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
+		D806A8752360787E005B5D08 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
+		D806A87A2361481C005B5D08 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		D806A87C23614BAA005B5D08 /* libSOIL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSOIL.a; path = lib/SOIL/libSOIL.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,10 +66,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D806A87B2361481C005B5D08 /* CoreFoundation.framework in Frameworks */,
 				0050158C2312667100D9A4D8 /* libglfw.3.dylib in Frameworks */,
 				0050158A231265CE00D9A4D8 /* libGLEW.a in Frameworks */,
 				0050153F2312659800D9A4D8 /* libglfw3.a in Frameworks */,
 				0050153D2312656600D9A4D8 /* IOKit.framework in Frameworks */,
+				D806A87D23614BAA005B5D08 /* libSOIL.a in Frameworks */,
 				0050153B2312655B00D9A4D8 /* CoreVideo.framework in Frameworks */,
 				005015392312654C00D9A4D8 /* GLUT.framework in Frameworks */,
 				005015372312653D00D9A4D8 /* Cocoa.framework in Frameworks */,
@@ -78,6 +86,8 @@
 		0050150A22E2F85400D9A4D8 = {
 			isa = PBXGroup;
 			children = (
+				D806A8752360787E005B5D08 /* lib */,
+				D806A87423607876005B5D08 /* include */,
 				0050152722FF0B2C00D9A4D8 /* GLSL */,
 				0050151522E2F85400D9A4D8 /* OpenGL_Project */,
 				0050151422E2F85400D9A4D8 /* Products */,
@@ -109,6 +119,8 @@
 		0050151D22E2F86C00D9A4D8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D806A87C23614BAA005B5D08 /* libSOIL.a */,
+				D806A87A2361481C005B5D08 /* CoreFoundation.framework */,
 				0050158B2312667100D9A4D8 /* libglfw.3.dylib */,
 				00501589231265CE00D9A4D8 /* libGLEW.a */,
 				0050153E2312659800D9A4D8 /* libglfw3.a */,
@@ -312,11 +324,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/include";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/lib",
+					"$(PROJECT_DIR)/lib/SOIL",
+					"$(PROJECT_DIR)",
+				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -327,8 +346,14 @@
 				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/include";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/lib",
+					"$(PROJECT_DIR)/lib/SOIL",
+					"$(PROJECT_DIR)",
+				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};

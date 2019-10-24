@@ -2,6 +2,9 @@
 #include <GLFW/glfw3.h>
 #include "math.h"
 #include "ManagerShader.hpp"
+#include "../include/SOIL/SOIL.h"
+#include "../include/SOIL/stb_image_aug.h"
+
 
 #include <iostream>
 
@@ -116,6 +119,9 @@ int main()
 */
     
     Shader shader("../GLSL/vertex.glsl","../GLSL/fragment.glsl");
+    
+    int width,height,Channels;
+    unsigned char* data = stbi_load("../assert/img_cheryl.jpg",&width,&height,&Channels,0);
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
