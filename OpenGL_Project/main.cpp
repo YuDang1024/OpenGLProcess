@@ -70,17 +70,26 @@ int main()
     Shader shader("../GLSL/vertex.glsl","../GLSL/fragment.glsl");
     
     // 加载纹理部分
-    int width,height,Channels;
-    unsigned char* data = stbi_load("../assert/img_cheryl.jpg",&width,&height,&Channels,0);
+    int width1,height1,Channels1;
+    unsigned char* data1 = stbi_load("../assert/img_cheryl.jpg",&width1,&height1,&Channels1,0);
     
-    unsigned int texture;
+    
+    unsigned int texture[2];
     // 第一个参数我们需要告诉OpenGL生成纹理的数量，并将其储存在unsigned int的数组中，因为现在我们只生成一个纹理，所以就不同数组了，使用一个单独的值
-    glGenTextures(1,&texture);
+    glGenTextures(2,texture);
     // 绑定纹理数组，让之后的纹理操作都在这个纹理上
-    glBindTexture(GL_TEXTURE_2D,texture);
+    glBindTexture(GL_TEXTURE_2D,texture[0]);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);    // set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // 设置过滤方式
+    // 纹理缩小的时候用临近过滤
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // 纹理放大的时候用线性过滤
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     // 使用前面图像的data数据生成纹理
-    if (data) {
-        ReverseImage(width, height, data, Channels);
+    if (data1) {
+        ReverseImage(width1, height1, data1, Channels1);
         /*
          参数解析：
          1、指定了要将纹理生成在哪一个纹理对象上
@@ -92,15 +101,38 @@ int main()
          8、告诉OpenGL原图的类型，因为我们获取的是char(byte)类型的数据，所以此处传GL_UNSIGNED_BYTE
          9、图像的数据
          */
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width1,height1,0,GL_RGB,GL_UNSIGNED_BYTE,data1);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        //glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width2,height2,0,GL_RGB,GL_UNSIGNED_BYTE,data2);
+        // 为当前绑定的纹理生成所有级别的渐进纹理
+        //glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else{
+        std::cout<<"使用SOIL加载图像数据失败"<<std::endl;
+    }
+    
+    // 加载第二张纹理数据
+    int width2,height2,Channels2;
+    unsigned char* data2 = stbi_load("../assert/stones.jpg",&width2,&height2,&Channels2,0);
+    glBindTexture(GL_TEXTURE_2D,texture[1]);
+    if (data2) {
+        ReverseImage(width2, height2, data2, Channels2);
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width2,height2,0,GL_RGB,GL_UNSIGNED_BYTE,data2);
         // 为当前绑定的纹理生成所有级别的渐进纹理
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else{
         std::cout<<"使用SOIL加载图像数据失败"<<std::endl;
     }
+    
+    
     // 生成纹理之后，释放刚才的图像数据
-    stbi_image_free(data);
+    stbi_image_free(data1);
+    stbi_image_free(data2);
+    
+    shader.use();
+    shader.setInt("texture1", 1);
+    shader.setInt("texture2", 0);
     
     
     
@@ -196,10 +228,17 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         
         // draw our first triangle
-        glBindTexture(GL_TEXTURE_2D,texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D,texture[0]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D,texture[1]);
+        
+        shader.use();
+        shader.setInt("texture1", 0);
+        shader.setInt("texture2", 1);
+        
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         //glUseProgram(shaderProgram);
-        shader.use();
         
         // 将片段着色器中的颜色值设置成随着时间变化(因为uniform相对于整个GLSL是全局变量，所以使用是在着色器对象生成之后，不一定非要在片段在shader的后面)
         //float timevalue = glfwGetTime();
@@ -234,7 +273,7 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
 
