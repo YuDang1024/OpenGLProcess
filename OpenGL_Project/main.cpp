@@ -11,7 +11,7 @@
 // 当窗口大小改变的时候回调函数
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // 处理窗口里面输入时间的函数
-void processInput(GLFWwindow *window,Shader shader);
+static void Key_callback(GLFWwindow *window,int key, int scancode, int action, int mods);
 void ReverseImage(int width, int height,unsigned char * data,int chanel);
 
 // 窗口宽高
@@ -216,7 +216,8 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         // input
-        processInput(window,shader);
+        //Key_callbac(window);
+        glfwSetKeyCallback(window, Key_callback);
         
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -267,13 +268,13 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window,Shader shader)
+static void Key_callback(GLFWwindow *window,int key, int scancode, int action, int mods)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        percent += 0.001f;
+        percent += 0.1f;
         if (percent > 1.0f) {
             percent = 1.0f;
         }
@@ -281,7 +282,7 @@ void processInput(GLFWwindow *window,Shader shader)
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
         
-        percent -= 0.001f;
+        percent -= 0.1f;
         if (percent < 0.0f) {
             percent = 0.0f;
         }
