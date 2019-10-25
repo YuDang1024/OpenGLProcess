@@ -11,11 +11,13 @@
 // 当窗口大小改变的时候回调函数
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // 处理窗口里面输入时间的函数
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window,Shader shader);
+void ReverseImage(int width, int height,unsigned char * data,int chanel);
 
 // 窗口宽高
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+static float percent = 0.0;
 
 // 因为SOIL获取的图像数据是反过来的，所以需要将数据反转一下
 void ReverseImage(int width, int height,unsigned char * data,int chanel)
@@ -130,11 +132,6 @@ int main()
     stbi_image_free(data1);
     stbi_image_free(data2);
     
-    shader.use();
-    shader.setInt("texture1", 1);
-    shader.setInt("texture2", 0);
-    
-    
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -219,11 +216,9 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         // input
-        // -----
-        processInput(window);
+        processInput(window,shader);
         
         // render
-        // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
@@ -234,8 +229,9 @@ int main()
         glBindTexture(GL_TEXTURE_2D,texture[1]);
         
         shader.use();
-        shader.setInt("texture1", 0);
-        shader.setInt("texture2", 1);
+        shader.setInt("texture1", 1);
+        shader.setInt("texture2", 0);
+        shader.setFloat("percent", percent);
         
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         //glUseProgram(shaderProgram);
@@ -271,10 +267,26 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window,Shader shader)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        percent += 0.001f;
+        if (percent > 1.0f) {
+            percent = 1.0f;
+        }
+    }
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        
+        percent -= 0.001f;
+        if (percent < 0.0f) {
+            percent = 0.0f;
+        }
+    }
+    
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
