@@ -159,6 +159,63 @@ int main()
         -0.5f,0.5f,0.0f,    1.0f,1.0f,1.0f,  0.0f,1.0f,
     };
     
+    float cube_vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    
+    glm::vec3 cube_Positions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    
     unsigned int index[] = {
         0,1,2,
         2,3,0,
@@ -181,10 +238,10 @@ int main()
     glGenBuffers(1,&IBO);
     
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_diamond), vertices_diamond, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
     
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(diamond_index),diamond_index,GL_STATIC_DRAW);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,IBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(diamond_index),diamond_index,GL_STATIC_DRAW);
     
     
     // 第一个参数就是在顶点shader中定义的layout(location =0)
@@ -194,13 +251,13 @@ int main()
     // 第五个参数指的是步长,现在我们一个顶点里面有三个数据，所以步长就是3个float，步长也就是一个顶点里面有个值，加了颜色之后就是6个float
     // 第六个参数指的是所需要的数据在顶点缓冲对象VBO里面的偏移量，因为我们现在使用的就是从开头到VBO结尾的数据，所以这个偏移量就是0
     // 位置属性
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // 颜色属性
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-    glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+    //glEnableVertexAttribArray(1);
     // 纹理属性
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, 8 * sizeof(float), (void*)(6* sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(2);
     
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
@@ -210,9 +267,38 @@ int main()
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0);
     
+    /*
+    // 生成旋转和缩放的矩阵
+    glm::mat4 trans = glm::mat4(1.0f);
+    // 放在帧循环里面，使用当前时间来控制矩阵的变化，使得图片有旋转的效果
+    // 绕着Z轴旋转90度
+    trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0,0.0,1.0f));
+    // X，Y，Z轴都缩放一半
+    trans = glm::scale(trans, glm::vec3(0.5,0.5,0.5));
+    */
     
-    // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
+    /*
+    // 设置旋转矩阵（效果：一直在旋转）
+    // Tip: 这个旋转矩阵必须是循环里面定义的变量，因为如果不在循环里面进行定义的话，这个矩阵就会被累加，渲染出来的图像就会直接就会飞掉
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, glm::vec3(0.5f,-0.5f,0.5f));
+    trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f,0.0f,1.0f));
+     */
+
+    // model matrix
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    //modelMatrix = glm::rotate(modelMatrix, glm::radians(-55.0f), glm::vec3(1.0f,0.0f,0.0f));
+    //modelMatrix = glm::rotate(modelMatrix, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+    
+    // view matrix
+    glm::mat4 viewMatrix = glm::mat4(1.0f);
+    viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f,0.0f,-3.0f));
+    
+    // projection matrix
+    glm::mat4 projMatrix = glm::mat4(1.0f);
+    projMatrix = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
     
     // render loop
     // -----------
@@ -224,7 +310,8 @@ int main()
         
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
         
         // draw our first triangle
         glActiveTexture(GL_TEXTURE0);
@@ -236,8 +323,26 @@ int main()
         shader.setInt("texture1", 1);
         shader.setInt("texture2", 0);
         shader.setFloat("percent", percent);
+        //shader.setMat4("transform", trans);
         
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        //更改model matrix以此来画出十个不同的cube
+        for (int i = 0; i<10; ++i) {
+            glm::mat4 model;
+            model = glm::translate(model, cube_Positions[i]);
+            float angle =20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f,0.3f,0.5f));
+            shader.setMat4("model", model);
+            shader.setMat4("view",viewMatrix);
+            shader.setMat4("projection", projMatrix);
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES,0,36);
+        }
+        
+        //shader.setMat4("model", modelMatrix);
+        //shader.setMat4("view",viewMatrix);
+        //shader.setMat4("projection", projMatrix);
+        
+        //glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         //glUseProgram(shaderProgram);
         
         // 将片段着色器中的颜色值设置成随着时间变化(因为uniform相对于整个GLSL是全局变量，所以使用是在着色器对象生成之后，不一定非要在片段在shader的后面)
@@ -249,8 +354,9 @@ int main()
         //glDrawArrays(GL_TRIANGLES, 0, 4);
         
         // 画矩形使用
-        glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
+        //glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
         // glBindVertexArray(0); // no need to unbind it every time
+        //glDrawArrays(GL_TRIANGLES,0,36);
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
