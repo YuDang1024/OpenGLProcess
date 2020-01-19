@@ -39,6 +39,11 @@ void ReverseImage(int width, int height,unsigned char * data,int chanel)
     }
 }
 
+// 为自由移动的摄影机定义的观察点，观察方向，up向量
+glm::vec3 cameraPos = glm::vec3(0.0f,0.0f,3.0f);
+glm::vec3 cameraDir = glm::vec3(0.0f,0.0f,-1.0f);
+glm::vec3 cameraUp  = glm::vec3(0.0f,1.0f,0.0f);
+
 int main()
 {
     // glfw: initialize and configure
@@ -298,7 +303,7 @@ int main()
     
     // projection matrix
     glm::mat4 projMatrix = glm::mat4(1.0f);
-    projMatrix = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
+    projMatrix = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT, 1.0f, 100.0f);
     
     // render loop
     // -----------
@@ -324,6 +329,16 @@ int main()
         shader.setInt("texture2", 0);
         shader.setFloat("percent", percent);
         //shader.setMat4("transform", trans);
+        /*
+        // 每一帧去更改view matrix，让其围绕着Y轴，对着（0，0，0）远点的位置,(固定改变)
+        float radius = 50.f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        viewMatrix = glm::lookAt(glm::vec3(camX,0.0f,camZ), glm::vec3(0.0f,0.0f,0.0f), glm::vec3(0.0f,1.0f,0.0f));
+        */
+        
+        // 自由移动的摄影机
+        viewMatrix = glm::lookAt(cameraPos, cameraDir, cameraUp);
         
         //更改model matrix以此来画出十个不同的cube
         for (int i = 0; i<10; ++i) {
@@ -379,6 +394,7 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 static void Key_callback(GLFWwindow *window,int key, int scancode, int action, int mods)
 {
+    float cameraSpeed = 0.05f;
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
@@ -395,6 +411,23 @@ static void Key_callback(GLFWwindow *window,int key, int scancode, int action, i
         if (percent < 0.0f) {
             percent = 0.0f;
         }
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_W))
+    {
+        cameraPos += cameraSpeed * cameraDir;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S))
+    {
+        cameraPos -= cameraSpeed * cameraDir;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A))
+    {
+        cameraPos -= glm::normalize(glm::cross(cameraDir , cameraUp)) * cameraSpeed;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D))
+    {
+        cameraPos += glm::normalize(glm::cross(cameraDir , cameraUp)) * cameraSpeed;
     }
     
 }
